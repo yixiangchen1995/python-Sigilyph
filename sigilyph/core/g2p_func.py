@@ -5,9 +5,8 @@ Author: Yixiang Chen
 version: 
 Date: 2025-03-31 16:55:51
 LastEditors: Yixiang Chen
-LastEditTime: 2025-05-12 20:02:40
+LastEditTime: 2025-08-12 14:42:02
 '''
-
 
 from g2p_en import G2p
 _g2p_en = G2p()
@@ -15,14 +14,14 @@ _g2p_en = G2p()
 def g2p_en(text, sp_sign='<sp>'):
     phone_list = _g2p_en(text)
     phone_list = [sp_sign if xx == " " else xx for xx in phone_list]
-    if phone_list[-1] != sp_sign:
+    if len(phone_list)>1 and phone_list[-1] != sp_sign:
         phone_list.append(sp_sign) 
     return phone_list
 
 
 from pypinyin import lazy_pinyin, Style
 
-from text_front.symbols import punctuation, punc_map_ch, cn_word2phone_dict
+from sigilyph.core.symbols import punctuation, punc_map_ch, cn_word2phone_dict
 for punc in punctuation:
     cn_word2phone_dict[punc] = punc
 

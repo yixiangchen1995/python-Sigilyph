@@ -1,0 +1,66 @@
+
+
+
+before_replace_dict = {
+    "AlphaFold-Plus": "AlphaFold Plus"
+}
+
+special_phrase = ['据了解']
+
+special_word_dict = {
+    "iPhone": "[AY1 F OW0 N]",
+    "IOS": "[AY1 OW1 AE1 S]",
+    "A十七": "[EY1 sh ir2 q i1]",
+    "A seventeen": "[EY1 S EH1 V AH0 N T IY1 N]",
+    "CEO": "[S IY1 IY1 OW1]",
+    "AI": "[EY1 AY1]",
+    "ID": "[AY1 D IY1]", 
+    "ABC": "[EY1 B IY1 S IY1]",
+    "VIP": "[V IY1 AY1 P IY1]",
+    "PDF": "[P IY1 D IY1 AE1 F]",
+    "NLP": "[EH1 NG EH2 L P IY1]",
+    "API": "[EY1 P IY1 AY1]",
+    "GPU": "[JH IY1 P IY1 Y UW1]",
+    "WeChat": "[W IY1 CH AE1 T]",
+    "PPT": "[P IY1 P IY1 T IY1]",
+    "CA": "[S IY1 EY1]",
+    ".com": "[d ian3 K AA1 M]",
+    ".zhang": "[ZH AA1 NG]",
+    "live": "[L AY0 V]",
+    "@": "[sil_1 AE1 T sil_1]",
+    "睡不着觉": "[sh ui4 b u4 zh e5 j iao4]",
+    "月经不调": "[y ve4 j ing1 b u4 t iao2]",
+    "长护险": "[ch ang2 h u4 x ian3]",
+    "长时间": "[ch ang2 sh ir2 j ian1]",
+    "长住外地": "[ch ang2 zh u4 w ai4 d i4]",
+    "长按": "[ch ang2 AA an4]",
+    "喉咙干疼": "[h ou2 l ong2 g an1 t eng2]", 
+    "死对头": "[s ii3 d ui4 t ou5]",
+    "成名曲": "[ch eng2 m ing2 q v3]",
+    "古朴": "[g u3 p u3]",
+    "啊": "[AA a1]",
+    "sinα": "[S AY1 N AH2 AE1 L F a3]",
+    "cosα": "[K OW0 S AY1 N AH2 AE1 L F a3]",
+    "tanα": "[T AE1 N JH AH0 N T AH2 AE1 L F a3]",
+    "α": "[AE1 L F a3]",
+    "Ⅰ": "[y i1]",
+    "Ⅱ": "[EE er4]",
+    "qq": "[K Y UW1 K Y UW1]",
+    "≠": "[b u4 d eng3 y v2]",
+    "Beijing": "[b ei3 j ing1]",
+    "<sil>": "[sil_1]",
+    "--": "[sil]",
+    "=-=": "[sil]",
+    ":": "[sil_1]",
+    "-": "[sil]",
+    "(": "[sil]",
+    ")": "[sil]",
+    "“": "[sil_1]",
+    "”": "[sil_1]",
+    "《": "[sil_1]",
+    "》": "[sil_1]",
+    "（": "[sil]",
+    "）": "[sil]",
+    "：": "[sil_1]",
+}
+
