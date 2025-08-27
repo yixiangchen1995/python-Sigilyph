@@ -1,0 +1,4 @@
+build/*
+dist/*
+sigilyph.egg-info/*
+**/.DS_Store

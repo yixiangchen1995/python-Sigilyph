@@ -5,7 +5,7 @@ Author: Yixiang Chen
 version: 
 Date: 2025-08-12 14:42:50
 LastEditors: Yixiang Chen
-LastEditTime: 2025-08-12 15:41:33
+LastEditTime: 2025-08-12 19:36:22
 '''
 
 import langid
@@ -49,13 +49,13 @@ class Sigilyph:
         
         self.special_phrase = special_phrase 
     
-    def forward(self, text, lang):
-        phones = self.text_process(text, lang)
+    def forward(self, text, lang, spflag=False, norm_use_lang='zh'):
+        phones = self.text_process(text, lang, spflag, norm_use_lang)
         phones = self.replace_sil2label(phones)
         return phones
 
-    def text_process(self, text, lang, spflag=True, use_lang='zh'):
-        text = preprocess_first(text, self.before_replace_dict, special_word_dict, norm_use_lang='zh')
+    def text_process(self, text, lang, spflag=False, norm_use_lang='zh'):
+        text = preprocess_first(text, self.before_replace_dict, special_word_dict, norm_use_lang=norm_use_lang)
 
         multi_lang_text_list = self.text_split_lang(text, lang) 
 
@@ -96,7 +96,7 @@ class Sigilyph:
                 if utext[0] != '[':
                     pattern = r'([a-zA-Z ,.\!\?]+|[\u4e00-\u9fa5 ，。,.\t \"\！\？\“\”\、]+)'
                     text_split = re.findall(pattern, utext)
-                    print(text_split)
+                    #print(text_split)
                     for idx in range(len(text_split)):
                         tmpts = text_split[idx]
                         tmp_lang = langid.classify(tmpts)[0]
@@ -165,7 +165,7 @@ class Sigilyph:
     def postprocess_tts(self, phonelist):
         #outlist = ['sil', '<sp>']
         outlist = []
-        print(phonelist)
+        #print(phonelist)
         for idx in range(len(phonelist)):
             pm = phonelist[idx]
             if pm not in self.punctuation:
@@ -188,7 +188,7 @@ class Sigilyph:
         return outlist
 
     ########## replace silence token ###############
-    def replace_sil2label(phones):
+    def replace_sil2label(self, phones):
         #phones = ['sil_1' if xx == 'sil_lang' else xx for xx in phones]
         phones = ['' if xx == 'sil_lang' else xx for xx in phones]
         phones = ['sil_2' if xx == 'sil_punc' else xx for xx in phones]

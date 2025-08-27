@@ -5,7 +5,7 @@ Author: chenyixiang
 version: 
 Date: 2024-10-17 11:16:37
 LastEditors: Yixiang Chen
-LastEditTime: 2025-08-12 16:38:26
+LastEditTime: 2025-08-12 17:49:21
 '''
 
 
@@ -441,4 +441,5 @@ en_phone_set = [
     "SH",
 ]
 
-
+all_phone_set = [] + sorted(set(base_phone_set)) + sorted(set(cn_phone_set)) + sorted(set(en_phone_set))
+all_phone_dict = {xx:idx for idx, xx in enumerate(all_phone_set)}

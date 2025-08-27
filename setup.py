@@ -5,12 +5,12 @@ Author: Yixiang Chen
 version: 
 Date: 2025-03-24 15:57:41
 LastEditors: Yixiang Chen
-LastEditTime: 2025-08-12 16:43:00
+LastEditTime: 2025-08-12 19:35:01
 '''
 
 from setuptools import setup, find_packages
 
-VERSION = '0.0.1' 
+VERSION = '0.2.1' 
 DESCRIPTION = 'Text Front for TTS'
 #LONG_DESCRIPTION = 'Data Package for TTS with a slightly longer description'
 LONG_DESCRIPTION = open("README.md", encoding="utf-8").read()
@@ -26,7 +26,10 @@ setup(
         long_description=LONG_DESCRIPTION,
         long_description_content_type="text/markdown",
         url="https://github.com/yixiangchen1995/python-Sigilyph",
-        packages=find_packages(),
+        packages=(
+            find_packages()
+        ),
+        include_package_data=True,
         install_requires=[
             'g2p_en',
             'jieba',

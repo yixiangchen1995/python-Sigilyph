@@ -1,0 +1,3 @@
+include sigilyph/core/cache_dir/*
+include sigilyph/core/special_dict.json
+include sigilyph/core/py2phone.dict
