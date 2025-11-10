@@ -5,7 +5,7 @@ Author: Yixiang Chen
 version: 
 Date: 2025-03-31 17:50:26
 LastEditors: Yixiang Chen
-LastEditTime: 2025-08-12 17:26:56
+LastEditTime: 2025-09-26 14:45:16
 '''
 
 
@@ -45,7 +45,6 @@ def pro_norm(text, use_lang='zh'):
         norm_text = en_tn_model.normalize(text)
         #print("en ", norm_text)
     return norm_text
-
 
 def replace_with_dict(text, replace_dict):
     for old, new in replace_dict.items():
