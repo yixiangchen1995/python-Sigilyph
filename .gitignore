@@ -2,3 +2,4 @@ build/*
 dist/*
 sigilyph.egg-info/*
 **/.DS_Store
+sigilyph/core/dict_norm_use.json

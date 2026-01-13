@@ -5,7 +5,7 @@ Author: Yixiang Chen
 version: 
 Date: 2025-03-31 17:50:26
 LastEditors: Yixiang Chen
-LastEditTime: 2025-09-26 14:45:16
+LastEditTime: 2026-01-13 11:58:08
 '''
 
 
@@ -50,6 +50,7 @@ def replace_with_dict(text, replace_dict):
     for old, new in replace_dict.items():
         text = text.replace(old, new)
     return text
+
 def replace_with_dict_re(text, replace_dict):
     pattern = re.compile("|".join(re.escape(key) for key in replace_dict.keys()))
     return pattern.sub(lambda m: replace_dict[m.group(0)], text)
@@ -69,6 +70,10 @@ def preprocess_first(text, before_replace_dict, special_word_dict, norm_use_lang
     rep_text = replace_with_dict(norm_text, special_word_dict)
     return rep_text
 
+def preprocess_first_for_norm(text, before_replace_dict, norm_use_lang='zh'):
+    text = replace_with_dict(text, before_replace_dict)
+    norm_text = pro_norm(text, norm_use_lang)
+    return norm_text
 
 def normalizer(text):
     return text
