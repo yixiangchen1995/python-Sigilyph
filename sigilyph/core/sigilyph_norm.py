@@ -5,7 +5,7 @@ Author: Yixiang Chen
 version: 
 Date: 2026-01-07 15:46:04
 LastEditors: Yixiang Chen
-LastEditTime: 2026-01-13 10:17:01
+LastEditTime: 2026-01-16 09:37:51
 '''
 
 import langid
@@ -19,6 +19,16 @@ norm_func_dict = {
     'en': text_norm_en,
     'zh': text_norm_cn
 }
+
+def is_float_strip(s: str) -> bool:
+    s = s.strip()   # 只去掉首尾空白
+    if not s:
+        return False
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
 
 class SigilyphNormalizer:
     def __init__(self, norm_use_dict) -> None:
@@ -45,6 +55,38 @@ class SigilyphNormalizer:
     def text_norm(self, text, lang):
         outtext = norm_func_dict[lang](text)
         return outtext
+    
+    def split_with_units(self, text, regex):
+        # 中文数字（常见大写+小写口语化）
+        CHINESE_NUM_CHARS = "零一二三四五六七八九十百千万亿两〇壹贰叁肆伍陆柒捌玖拾佰仟萬億"
+        # 单位模式：可按需要继续扩展
+        unit_pattern = re.compile(r'^(\s*)(km/h|km|m/s|m|s|g|h|kg|mm|cm)\b')
+        
+        pieces = re.findall(regex, text)
+        merged = []
+
+        for piece in pieces:
+            if merged:
+                m = unit_pattern.match(piece)
+                if m:
+                    # 前一块最后一个字符
+                    last_char = merged[-1][-1]
+                    # 条件：前一块以“汉字或阿拉伯数字或中文数字”结尾
+                    if (
+                        re.match(r'[\u4e00-\u9fff\u3400-\u4dbf0-9]', last_char)
+                        or last_char in CHINESE_NUM_CHARS
+                    ):
+                        # 把单位并到前一块
+                        merged[-1] += m.group(1) + m.group(2)
+                        # 当前块剩余部分（若有）单独保留
+                        rest = piece[m.end():]
+                        if rest:
+                            merged.append(rest)
+                        continue
+
+            merged.append(piece)
+
+        return merged
 
     ###############  split text in line with lang ##############
     def text_split_lang(self, text, lang):
@@ -59,59 +101,60 @@ class SigilyphNormalizer:
             pretext_split = list(filter(None, pretext_split))
             for utext in pretext_split:
                 if utext[0] != '[':
-                    pattern = r'([a-zA-Z ,.\!\?]+|[\u4e00-\u9fa5 ，。,.\t \"\！\？\“\”\、]+)'
-                    text_split = re.findall(pattern, utext)
-                    #print(text_split)
+                    #pattern = r'([a-zA-Z ,.\!\?]+|[\u4e00-\u9fa5 ，。,.\t \"\！\？\“\”\、]+)'
+                    #text_split = re.findall(pattern, utext)
+                    pattern = r'''(
+                        # ---------- 中文块 ----------
+                        # 汉字 + 数字 + 日期时间符号 + 中/英逗号句号 + 常见中文标点 +
+                        # 全角空格 + 半角空格 + ℃ + / + % + 单位字母 k,m,g,h（大小写都算）
+                        [\u4e00-\u9fff\u3400-\u4dbf
+                        0-9
+                        \-:~_                      # 日期/时间里的 - 和 :
+                        ，。！？：；、…“”‘’「」『』《》．【】（）\u3000
+                        ,\.                      # 英文逗号、英文句号
+                        \x20                     # 半角空格
+                        /%                       # / 和 %
+                        ℃
+                        $£￡¥￥฿€₹₽CHFR$
+                        ]+
+                        |
+                        # ---------- 英文块 ----------
+                        # 字母 + 数字 + 英文标点 + 其它空白（制表符/换行等）
+                        [a-zA-Z
+                        ,\.!?;:'"\-\(\)\[\]/\\_@#\$%&\+
+                        \t\r\n\f\v               # 其它空白（不含普通空格）
+                        ]+
+                        |
+                        # ---------- 其它块 ----------
+                        # 不属于上面两类的字符（emoji、特殊符号等）
+                        [^a-zA-Z0-9
+                        \u4e00-\u9fff\u3400-\u4dbf
+                        ，。！？：；、…“”‘’「」『』《》．【】（）\u3000
+                        \-:
+                        ,\.
+                        \x20\t\r\n\f\v
+                        /%
+                        ℃
+                        ]+
+                    )'''
+                    regex = re.compile(pattern, re.VERBOSE)
+                    #text_split = re.findall(regex, utext)
+                    text_split = self.split_with_units(utext, regex)
                     for idx in range(len(text_split)):
                         tmpts = text_split[idx]
-                        tmp_lang = langid.classify(tmpts)[0]
-                        if len(tmpts)>20:
-                            if not self.has_punc(tmpts[:-1]):
-                                tmpts = self.add_pause(tmpts, 'p')
-                            if not self.has_punc(tmpts[:-1]):
-                                tmpts = self.add_pause(tmpts, 'v')   
-                        if tmpts in self.special_phrase:
-                            tmpts = tmpts+self.sil1symbol
+                        #if tmpts.strip().isdigit():
+                        if is_float_strip(tmpts):
+                            tmp_lang = 'zh'
+                        else:
+                            tmp_lang = langid.classify(tmpts)[0]
                         if tmp_lang in ['zh', 'jp', 'ja']:
                             tmp_lang = 'zh'
-                            tmpts = tmpts.replace(' ', self.sil1symbol)
+                            #tmpts = tmpts.replace(' ', self.sil1symbol)
                         else:
                             tmp_lang = 'en' 
-                        if not tmpts.isspace():
-                            multi_lang_text_list.append({'lang':tmp_lang, 'text_split': tmpts})
+                        multi_lang_text_list.append({'lang':tmp_lang, 'text_split': tmpts})
                 else:
                     phones = utext[1:-1]
                     multi_lang_text_list.append({'lang':'phone', 'text_split': phones})
         return multi_lang_text_list
 
-    ##########  add parse ###############
-    def has_punc(self, text):
-        for char in text:
-            if char in [',', '.', '!', '?', '，','。','？','！', self.sil1symbol]:
-                return True
-        return False
-    
-    def add_pause(self, text, tf='v'):
-        segment = jieba.posseg.cut(text.strip())
-        wlist = []
-        flist = []
-        for x in segment:
-            wlist.append(x.word)
-            flist.append(x.flag)
-        idx = self.search_ele_mid(flist, tf)
-        if idx != len(flist)-1:
-            wlist.insert(idx, self.sil1symbol)
-        outtext = ''.join(wlist)
-        return outtext
-    
-    def search_ele_mid(self, flaglist, tf = 'v'):
-        nowidx = -1
-        halflen = (len(flaglist))//2
-        for gap in range(len(flaglist)-halflen):
-            nowidx = halflen - gap
-            if flaglist[nowidx]==tf:
-                return nowidx
-            nowidx = halflen + gap
-            if flaglist[nowidx]==tf:
-                return nowidx
-        return nowidx

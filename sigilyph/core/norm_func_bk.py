@@ -5,7 +5,7 @@ Author: Yixiang Chen
 version: 
 Date: 2025-03-31 17:50:26
 LastEditors: Yixiang Chen
-LastEditTime: 2026-01-16 17:15:18
+LastEditTime: 2026-01-13 17:44:02
 '''
 
 
@@ -26,8 +26,8 @@ basedir = files('sigilyph')
 #en_tn_model = EnNormalizer()
 #zh_tn_model = ZhNormalizer(cache_dir='./sigilyph/core/cache_dir', remove_erhua=False, full_to_half=False)
 #en_tn_model = EnNormalizer(cache_dir='./sigilyph/core/cache_dir')
-zh_tn_model = ZhNormalizer(version_id='v2', cache_dir=os.path.join(basedir, 'core', 'cache_dir'), remove_erhua=False, full_to_half=False)
-en_tn_model = EnNormalizer(version_id='v2', cache_dir=os.path.join(basedir, 'core', 'cache_dir'))
+zh_tn_model = ZhNormalizer(cache_dir=os.path.join(basedir, 'core', 'cache_dir'), remove_erhua=False, full_to_half=False)
+en_tn_model = EnNormalizer(cache_dir=os.path.join(basedir, 'core', 'cache_dir'))
 
 import json
 #import sys
@@ -73,7 +73,8 @@ def preprocess_first(text, before_replace_dict, special_word_dict, norm_use_lang
 
 def preprocess_first_for_norm(text, before_replace_dict, norm_use_lang='zh'):
     text = replace_with_dict(text, before_replace_dict)
-    return text
+    norm_text = pro_norm(text, norm_use_lang)
+    return norm_text
 
 def normalizer(text):
     return text
@@ -87,55 +88,11 @@ def replace_punc(text):
     )
     return replaced_text
 
-def replace_punc_part(text: str) -> str:
-    """
-    将中文句号、逗号、分号、引号替换为英文符号：
-    。 -> .
-    ， -> ,
-    ； -> ;
-    “ -> "
-    ” -> "
-    『 -> "
-    』 -> "
-    「 -> "
-    」 -> "
-    『』、「」等都统一为英文双引号
-    其他符号不动
-    """
-    # 建立映射表
-    mapping = {
-        '。': '.',
-        '，': ',',
-        '；': ';',
-        '“': '"',
-        '”': '"',
-        '「': '"',
-        '」': '"',
-        '『': '"',
-        '』': '"',
-    }
-
-    # 构造正则：匹配所有需要替换的中文标点
-    pattern = re.compile(r'[。，“”；「」『』]')
-
-    # 使用 re.sub 进行替换
-    return pattern.sub(lambda m: mapping[m.group(0)], text)
-
-'''
 def text_norm_cn(text):
     text = normalizer(text)
     text = replace_punc(text)
     return text
 
 def text_norm_en(text):
+    
     return text 
-'''
-
-def text_norm_cn(text):
-    norm_text = zh_tn_model.normalize(text) 
-    norm_text = replace_punc_part(norm_text)
-    return norm_text
-
-def text_norm_en(text):
-    norm_text = en_tn_model.normalize(text)
-    return norm_text 
