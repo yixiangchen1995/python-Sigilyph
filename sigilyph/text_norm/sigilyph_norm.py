@@ -5,12 +5,13 @@ Author: Yixiang Chen
 version: 
 Date: 2026-01-07 15:46:04
 LastEditors: Yixiang Chen
-LastEditTime: 2026-01-16 18:49:09
+LastEditTime: 2026-01-19 19:55:00
 '''
 
 import langid
 import re
 import jieba
+import os
 
 from sigilyph.text_norm.norm_func import preprocess_first_for_norm, text_norm_en, text_norm_cn
 from sigilyph.core.predict import special_phrase
@@ -19,6 +20,16 @@ norm_func_dict = {
     'en': text_norm_en,
     'zh': text_norm_cn
 }
+
+import json
+from importlib_resources import files
+basedir = files('sigilyph')
+with open(os.path.join(basedir, 'text_norm', 'dict_special_word_polyphone.json'), 'r', encoding="utf-8") as infi:
+    dict_special_word_polyphone_json = json.load(infi)
+    dict_special_word_polyphone = dict_special_word_polyphone_json['polyphone_config']
+with open(os.path.join(basedir, 'text_norm', 'dict_special_word_base.json'), 'r', encoding="utf-8") as infib:
+    dict_special_word_base_json = json.load(infib)
+    dict_special_word_base = dict_special_word_base_json['base_config']
 
 def is_float_strip(s: str) -> bool:
     s = s.strip()   # 只去掉首尾空白
@@ -35,7 +46,15 @@ class SigilyphNormalizer:
         self.sil1symbol='-'
         self.special_phrase = special_phrase 
 
-        self.before_replace_dict = norm_use_dict 
+        self.base_replace_dict = dict_special_word_base
+        self.base_replace_dict.update(dict_special_word_polyphone)
+
+        self.before_replace_dict = self.base_replace_dict
+        self.before_replace_dict.update(norm_use_dict)
+    
+    def fix_replace_dict(self, new_before_replace_dict):
+        self.before_replace_dict = self.base_replace_dict
+        self.before_replace_dict.update(new_before_replace_dict)
 
     def normalize(self, text, lang, norm_use_lang='zh'):
         text = preprocess_first_for_norm(text, self.before_replace_dict, norm_use_lang=norm_use_lang)

@@ -5,7 +5,7 @@ Author: Yixiang Chen
 version: 
 Date: 2025-03-31 17:50:26
 LastEditors: Yixiang Chen
-LastEditTime: 2026-01-16 18:45:26
+LastEditTime: 2026-01-19 20:05:35
 '''
 
 
@@ -45,6 +45,26 @@ def replace_with_dict_re(text, replace_dict):
     pattern = re.compile("|".join(re.escape(key) for key in replace_dict.keys()))
     return pattern.sub(lambda m: replace_dict[m.group(0)], text)
 
+def replace_roman_1_to_10(text: str) -> str:
+    """
+    将字符串中的罗马数字符号 Ⅰ～Ⅹ 替换为中文数字 一～十。
+    其余任何字符（包括乱码、英文 I/V/X 等）都保持不变。
+    """
+    roman_to_cn = {
+        'Ⅰ': '一',
+        'Ⅱ': '二',
+        'Ⅲ': '三',
+        'Ⅳ': '四',
+        'Ⅴ': '五',
+        'Ⅵ': '六',
+        'Ⅶ': '七',
+        'Ⅷ': '八',
+        'Ⅸ': '九',
+        'Ⅹ': '十',
+    }
+    # 逐字符扫描，能映射的就换成中文数字，不能映射的原样保留
+    return ''.join(roman_to_cn.get(ch, ch) for ch in text)
+
 pre_replace_dict = {"AlphaFold-Plus": "AlphaFold Plus"}
 def preprocess_first_old(text, use_lang='zh'):
     text = replace_with_dict(text, pre_replace_dict)
@@ -65,6 +85,7 @@ def post_process(text , special_word_dict):
 
 
 def preprocess_first_for_norm(text, before_replace_dict, norm_use_lang='zh'):
+    text = replace_roman_1_to_10(text)
     text = replace_with_dict(text, before_replace_dict)
     return text
 
