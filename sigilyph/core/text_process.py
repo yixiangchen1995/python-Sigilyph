@@ -5,7 +5,7 @@ Author: Yixiang Chen
 version: 
 Date: 2025-03-31 16:31:26
 LastEditors: Yixiang Chen
-LastEditTime: 2025-08-12 14:40:42
+LastEditTime: 2026-01-16 17:36:55
 '''
 
 
@@ -16,7 +16,8 @@ import jieba
 import jieba.posseg
 
 from sigilyph.core.g2p_func import g2p_en, g2p_cn
-from sigilyph.core.norm_func import preprocess_first, text_norm_en, text_norm_cn
+#from sigilyph.core.norm_func import preprocess_first, text_norm_en, text_norm_cn
+from sigilyph.text_norm.norm_func import preprocess_first, text_norm_en, text_norm_cn
 
 from sigilyph.core.symbols import base_phone_set, cn_phone_set, en_phone_set, punctuation, special_phrase
 

@@ -5,7 +5,7 @@ Author: Yixiang Chen
 version: 
 Date: 2025-08-12 14:42:50
 LastEditors: Yixiang Chen
-LastEditTime: 2025-08-12 19:36:22
+LastEditTime: 2026-01-16 18:45:50
 '''
 
 import langid
@@ -16,7 +16,7 @@ import jieba
 import jieba.posseg
 
 from sigilyph.core.g2p_func import g2p_en, g2p_cn
-from sigilyph.core.norm_func import preprocess_first, text_norm_en, text_norm_cn
+from sigilyph.text_norm.norm_func import preprocess_first, post_process, text_norm_en, text_norm_cn
 from sigilyph.core.symbols import punctuation 
 from sigilyph.core.predict import before_replace_dict, special_word_dict, special_phrase
 
@@ -55,6 +55,37 @@ class Sigilyph:
         return phones
 
     def text_process(self, text, lang, spflag=False, norm_use_lang='zh'):
+        text = preprocess_first(text, self.before_replace_dict, special_word_dict, norm_use_lang=norm_use_lang)
+        text = self.text_norm(use_text, norm_use_lang) 
+        text = post_process(text, special_word_dict)
+
+        multi_lang_text_list = self.text_split_lang(text, lang) 
+
+        all_phone = []
+        for text_split_dict in multi_lang_text_list:
+            use_lang = text_split_dict['lang']
+            use_text = text_split_dict['text_split']
+            if use_lang == 'phone':
+                phonelist = use_text.split()
+                all_phone.extend(phonelist) 
+            else:
+                if use_lang not in norm_func_dict.keys():
+                    use_lang = 'zh'
+                #use_text = self.text_norm(use_text, use_lang)
+                use_text = use_text
+                phone_list = self.g2p(use_text, use_lang)
+                #all_phone.append('sil')
+                all_phone.append('sil_lang')
+                all_phone.append('<sp>')
+                all_phone.extend(phone_list)
+        #all_phone = postprocess(all_phone)
+        all_phone = self.postprocess_tts(all_phone)
+        if not spflag:
+            while '<sp>' in all_phone:
+                all_phone.remove('<sp>')
+        return all_phone
+
+    def text_process_old(self, text, lang, spflag=False, norm_use_lang='zh'):
         text = preprocess_first(text, self.before_replace_dict, special_word_dict, norm_use_lang=norm_use_lang)
 
         multi_lang_text_list = self.text_split_lang(text, lang) 

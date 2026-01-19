@@ -1,6 +1,4 @@
 
-
-
 before_replace_dict = {
     "AlphaFold-Plus": "AlphaFold Plus"
 }

@@ -1,11 +1,11 @@
 '''
-FilePath: /python-Sigilyph/sigilyph/core/norm_func.py
+FilePath: /python-Sigilyph/sigilyph/text_norm/norm_func.py
 Descripttion: 
 Author: Yixiang Chen
 version: 
 Date: 2025-03-31 17:50:26
 LastEditors: Yixiang Chen
-LastEditTime: 2026-01-16 17:15:18
+LastEditTime: 2026-01-16 18:45:26
 '''
 
 
@@ -13,8 +13,6 @@ import re
 
 from sigilyph.core.symbols import punctuation, punc_map_ch
 
-#from tn.chinese.normalizer import Normalizer as ZhNormalizer
-#from tn.english.normalizer import Normalizer as EnNormalizer
 from sigilyph.fst_tool.infer_normalizer import ZhNormalizer, EnNormalizer
 
 
@@ -22,19 +20,10 @@ import os
 from importlib_resources import files
 basedir = files('sigilyph')
 
-#zh_tn_model = ZhNormalizer(remove_erhua=False, full_to_half=False)
-#en_tn_model = EnNormalizer()
-#zh_tn_model = ZhNormalizer(cache_dir='./sigilyph/core/cache_dir', remove_erhua=False, full_to_half=False)
-#en_tn_model = EnNormalizer(cache_dir='./sigilyph/core/cache_dir')
-zh_tn_model = ZhNormalizer(version_id='v2', cache_dir=os.path.join(basedir, 'core', 'cache_dir'), remove_erhua=False, full_to_half=False)
-en_tn_model = EnNormalizer(version_id='v2', cache_dir=os.path.join(basedir, 'core', 'cache_dir'))
+zh_tn_model = ZhNormalizer(version_id='v2', cache_dir=os.path.join(basedir, 'text_norm', 'cache_dir'), remove_erhua=False, full_to_half=False)
+en_tn_model = EnNormalizer(version_id='v2', cache_dir=os.path.join(basedir, 'text_norm', 'cache_dir'))
 
 import json
-#import sys
-#sys.path.append('text_front')
-#with open('./special_dict.json', 'r', encoding="utf-8") as infi:
-#with open('./text_front/special_dict.json', 'r', encoding="utf-8") as infi:
-#with open('./sigilyph/core/special_dict.json', 'r', encoding="utf-8") as infi:
 with open(os.path.join(basedir, 'core', 'special_dict.json'), 'r', encoding="utf-8") as infi:
     special_dict = json.load(infi)
 
@@ -68,8 +57,12 @@ def preprocess_first(text, before_replace_dict, special_word_dict, norm_use_lang
     text = replace_with_dict(text, before_replace_dict)
     norm_text = pro_norm(text, norm_use_lang)
     #print(norm_text)
-    rep_text = replace_with_dict(norm_text, special_word_dict)
+    #rep_text = replace_with_dict(norm_text, special_word_dict)
+    return norm_text
+def post_process(text , special_word_dict):
+    rep_text = replace_with_dict(text, special_word_dict)
     return rep_text
+
 
 def preprocess_first_for_norm(text, before_replace_dict, norm_use_lang='zh'):
     text = replace_with_dict(text, before_replace_dict)

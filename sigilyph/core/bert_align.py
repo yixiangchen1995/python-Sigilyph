@@ -5,7 +5,7 @@ Author: Yixiang Chen
 version: 
 Date: 2025-09-24 15:13:38
 LastEditors: Yixiang Chen
-LastEditTime: 2025-09-28 11:05:20
+LastEditTime: 2026-01-16 18:53:54
 '''
 
 import torch
@@ -17,7 +17,7 @@ _g2p_en = G2p()
 
 from pypinyin import lazy_pinyin, Style
 
-from sigilyph.core.norm_func import text_norm_cn
+from sigilyph.text_norm.norm_func import text_norm_cn
 from sigilyph.core.symbols import punctuation, punc_map_ch, cn_word2phone_dict
 for punc in punctuation:
     cn_word2phone_dict[punc] = punc

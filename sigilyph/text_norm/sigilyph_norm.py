@@ -1,18 +1,18 @@
 '''
-FilePath: /python-Sigilyph/sigilyph/core/sigilyph_norm.py
+FilePath: /python-Sigilyph/sigilyph/text_norm/sigilyph_norm.py
 Descripttion: 
 Author: Yixiang Chen
 version: 
 Date: 2026-01-07 15:46:04
 LastEditors: Yixiang Chen
-LastEditTime: 2026-01-16 09:37:51
+LastEditTime: 2026-01-16 18:49:09
 '''
 
 import langid
 import re
 import jieba
 
-from sigilyph.core.norm_func import preprocess_first_for_norm, text_norm_en, text_norm_cn
+from sigilyph.text_norm.norm_func import preprocess_first_for_norm, text_norm_en, text_norm_cn
 from sigilyph.core.predict import special_phrase
 
 norm_func_dict = {
