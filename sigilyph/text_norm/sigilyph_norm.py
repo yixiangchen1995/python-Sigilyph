@@ -5,7 +5,7 @@ Author: Yixiang Chen
 version: 
 Date: 2026-01-07 15:46:04
 LastEditors: Yixiang Chen
-LastEditTime: 2026-01-19 19:55:00
+LastEditTime: 2026-01-26 15:20:26
 '''
 
 import langid
@@ -47,7 +47,7 @@ class SigilyphNormalizer:
         self.special_phrase = special_phrase 
 
         self.base_replace_dict = dict_special_word_base
-        self.base_replace_dict.update(dict_special_word_polyphone)
+        #self.base_replace_dict.update(dict_special_word_polyphone)
 
         self.before_replace_dict = self.base_replace_dict
         self.before_replace_dict.update(norm_use_dict)
@@ -56,7 +56,7 @@ class SigilyphNormalizer:
         self.before_replace_dict = self.base_replace_dict
         self.before_replace_dict.update(new_before_replace_dict)
 
-    def normalize(self, text, lang, norm_use_lang='zh'):
+    def normalize(self, text, lang, norm_use_lang='zh', replace_punc_flag=False):
         text = preprocess_first_for_norm(text, self.before_replace_dict, norm_use_lang=norm_use_lang)
         multi_lang_text_list = self.text_split_lang(text, lang) 
         all_phone = []
@@ -66,13 +66,13 @@ class SigilyphNormalizer:
             use_text = text_split_dict['text_split']
             if use_lang not in norm_func_dict.keys():
                 use_lang = 'zh'
-            use_text = self.text_norm(use_text, use_lang)
+            use_text = self.text_norm(use_text, use_lang, replace_punc_flag)
             outtext += use_text 
         return outtext 
     
     ######## text norm #########
-    def text_norm(self, text, lang):
-        outtext = norm_func_dict[lang](text)
+    def text_norm(self, text, lang, replace_punc_flag=False):
+        outtext = norm_func_dict[lang](text, replace_punc_flag)
         return outtext
     
     def split_with_units(self, text, regex):
@@ -130,7 +130,7 @@ class SigilyphNormalizer:
                         0-9
                         \-:~_                      # 日期/时间里的 - 和 :
                         ，。！？：；、…“”‘’「」『』《》．【】（）\u3000
-                        ,\.                      # 英文逗号、英文句号
+                        ,\.\<\>                       # 英文逗号、英文句号
                         \x20                     # 半角空格
                         /%                       # / 和 %
                         ℃
@@ -140,7 +140,7 @@ class SigilyphNormalizer:
                         # ---------- 英文块 ----------
                         # 字母 + 数字 + 英文标点 + 其它空白（制表符/换行等）
                         [a-zA-Z
-                        ,\.!?;:'"\-\(\)\[\]/\\_@#\$%&\+
+                        ,\.!?;:'"\-\(\)\[\]/\\_@#\$%&\+\|\>\<
                         \t\r\n\f\v               # 其它空白（不含普通空格）
                         ]+
                         |

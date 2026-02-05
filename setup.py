@@ -5,12 +5,12 @@ Author: Yixiang Chen
 version: 
 Date: 2025-03-24 15:57:41
 LastEditors: Yixiang Chen
-LastEditTime: 2026-01-19 11:25:16
+LastEditTime: 2026-01-26 15:04:10
 '''
 
 from setuptools import setup, find_packages
 
-VERSION = '0.5.1' 
+VERSION = '0.5.4' 
 DESCRIPTION = 'Text Front for TTS'
 #LONG_DESCRIPTION = 'Data Package for TTS with a slightly longer description'
 LONG_DESCRIPTION = open("README.md", encoding="utf-8").read()
@@ -35,6 +35,8 @@ setup(
             'jieba',
             'jieba_fast',
             'pypinyin',
+            'pynini',
+            'importlib-resources',
             'langid'
         ], # add any additional packages that ## add tinytag package
         

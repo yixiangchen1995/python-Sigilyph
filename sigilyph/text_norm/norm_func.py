@@ -5,7 +5,7 @@ Author: Yixiang Chen
 version: 
 Date: 2025-03-31 17:50:26
 LastEditors: Yixiang Chen
-LastEditTime: 2026-01-19 20:05:35
+LastEditTime: 2026-01-26 14:22:38
 '''
 
 
@@ -145,11 +145,12 @@ def text_norm_en(text):
     return text 
 '''
 
-def text_norm_cn(text):
+def text_norm_cn(text, replace_punc_flag=True):
     norm_text = zh_tn_model.normalize(text) 
-    norm_text = replace_punc_part(norm_text)
+    if replace_punc_flag:
+        norm_text = replace_punc_part(norm_text)
     return norm_text
 
-def text_norm_en(text):
+def text_norm_en(text, replace_punc_flag=True):
     norm_text = en_tn_model.normalize(text)
     return norm_text 

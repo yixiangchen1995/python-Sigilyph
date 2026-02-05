@@ -1,3 +1,6 @@
-include sigilyph/core/cache_dir/*
+include sigilyph/text_norm/cache_dir/*
 include sigilyph/core/special_dict.json
 include sigilyph/core/py2phone.dict
+include sigilyph/text_norm/dict_special_word_base.json
+include sigilyph/text_norm/dict_special_word_polyphone.json
+include sigilyph/text_norm/dict_special_word_oldbv2.json
