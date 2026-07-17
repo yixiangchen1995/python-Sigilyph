@@ -36,9 +36,11 @@ class Math(Processor):
                    | cross(">", "大于"))
 
         number = Cardinal().number
-        tagger = add_weight(number +
+        math_start = (operator | symbols) + delete(" ").ques + number
+        tagger = add_weight((number +
                   (delete(" ").ques +
-                   (operator | symbols) + delete(" ").ques + number).star, 1)
+                   (operator | symbols) + delete(" ").ques + number).star)
+                  | math_start, 1)
 
         #pp = add_weight((number + cross('-', ',')).closure(4), 0.1)
         pp = add_weight(number +
@@ -56,8 +58,7 @@ class Math(Processor):
         dash_rm = add_weight(cross('--《', '<sil>《'), 0.1)
         tmpadd |= dash_rm
 
-        tagger |= operator
-        #tagger = insert('value: "') + tagger + insert('"')
-        #tagger = insert('value: "') + (tagger | fixcase) + insert('"')
+        # standalone symbols should not override fallback hyphen-to-到 in general text
+        # standalone operators are only handled as part of numeric/math expressions.
         tagger = insert('value: "') + (tagger | fixcase | tmpadd) + insert('"')
         self.tagger = self.add_tokens(tagger)

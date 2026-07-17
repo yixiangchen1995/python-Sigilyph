@@ -14,7 +14,8 @@
 
 from tn.processor import Processor
 
-from pynini.lib.pynutil import insert
+from pynini import cross
+from pynini.lib.pynutil import delete, insert
 
 
 class Char(Processor):
@@ -27,3 +28,8 @@ class Char(Processor):
     def build_tagger(self):
         tagger = insert('value: "') + self.CHAR + insert('"')
         self.tagger = self.add_tokens(tagger)
+
+    def build_verbalizer(self):
+        super().build_verbalizer()
+        hyphen = delete('value: "') + cross('-', '到') + delete('"')
+        self.verbalizer |= self.delete_tokens(hyphen)

@@ -20,8 +20,8 @@ import os
 from importlib_resources import files
 basedir = files('sigilyph')
 
-zh_tn_model = ZhNormalizer(version_id='v2', cache_dir=os.path.join(basedir, 'text_norm', 'cache_dir'), remove_erhua=False, full_to_half=False)
-en_tn_model = EnNormalizer(version_id='v2', cache_dir=os.path.join(basedir, 'text_norm', 'cache_dir'))
+zh_tn_model = ZhNormalizer(version_id='v3', cache_dir=os.path.join(basedir, 'text_norm', 'cache_dir'), remove_erhua=False, full_to_half=False)
+en_tn_model = EnNormalizer(version_id='v3', cache_dir=os.path.join(basedir, 'text_norm', 'cache_dir'))
 
 import json
 with open(os.path.join(basedir, 'core', 'special_dict.json'), 'r', encoding="utf-8") as infi:
