@@ -1,0 +1,72 @@
+# Copyright (c) 2022 Zhendong Peng (pzd17@tsinghua.org.cn)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+from tn.chinese.rules.cardinal import Cardinal
+from tn.processor import Processor
+from tn.utils import get_abs_path
+
+from pynini import string_file, cross
+from pynini.lib.pynutil import delete, insert, add_weight
+
+
+class Time(Processor):
+
+    def __init__(self):
+        super().__init__(name='time')
+        self.build_tagger()
+        self.build_verbalizer()
+
+    def build_tagger(self):
+        h = string_file(get_abs_path('chinese/data/time/hour.tsv'))
+        m = string_file(get_abs_path('chinese/data/time/minute.tsv'))
+        s = string_file(get_abs_path('chinese/data/time/second.tsv'))
+        noon = string_file(get_abs_path('chinese/data/time/noon.tsv'))
+        colon = delete(':') | delete('：')
+
+        tagger = (insert('hour: "') + h + insert('" ') + colon +
+                  insert('minute: "') + m + insert('"') +
+                  (colon + insert(' second: "') + s + insert('"')).ques +
+                  delete(' ').ques +
+                  (insert(' noon: "') + noon + insert('"')).ques)
+        tagger = self.add_tokens(tagger)
+
+        to = (delete('-') | delete('~')) + insert(' char { value: "到" } ')
+
+        #number = Cardinal().number
+        #tmpadd = add_weight(number + delete(" ").ques + cross("'", "分钟") + number + delete(" ").ques + cross("''", "秒"), 0.1)
+        #tmpadd = insert('value: "') + tmpadd + insert('"')
+
+        self.tagger = tagger + (to + tagger).ques
+        #self.tagger = tagger + (to + tagger).ques + tmpadd
+
+    def build_verbalizer(self):
+        noon = delete('noon: "') + self.SIGMA + delete('" ')
+        hour_raw = delete('hour: "') + self.SIGMA + delete('" ')
+        hour = hour_raw @ (self.SIGMA.star + delete("点"))
+        minute = delete('minute: "') + self.SIGMA + delete('"')
+        second = delete(' second: "') + self.SIGMA + delete('"')
+        # 有秒：十七时四十四分十五秒
+        with_second = (
+            hour + insert("时") +
+            minute +
+            second.ques
+        )
+
+        # 无秒：十七点四十四分
+        without_second = (
+            hour + insert("点") +
+            minute
+        )
+        verbalizer = noon.ques + (with_second | without_second)
+        self.verbalizer = self.delete_tokens(verbalizer)
