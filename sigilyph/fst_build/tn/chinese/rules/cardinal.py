@@ -18,6 +18,17 @@ from tn.utils import get_abs_path
 from pynini import accep, cross, string_file
 from pynini.lib.pynutil import add_weight, delete, insert
 
+# 配置电话中的连字符 '-' 如何发音：
+# 'delete' -> 不发音（默认）；'gang' -> 读作 '杠'
+PHONE_HYPHEN_MODE = 'delete'
+
+# 配置哪些前文关键字后面的连续数字需要按电话读法读出。
+# 后续只需往这个列表里添加新的关键字即可。
+PHONE_PREFIXES = [
+    '工号',
+    '浮光掠影',
+]
+
 
 class Cardinal(Processor):
 
@@ -76,9 +87,68 @@ class Cardinal(Processor):
         cardinal |= digits.plus + (delete('-') + digits.plus)**2
         # xxx-xxxxxxxx
         cardinal |= digits**3 + delete('-') + digits**8
-        # three or five or eleven phone numbers
+
+        # phone numbers: every digit is read separately, and '1' is read as '幺'
         phone_digits = digits @ self.build_rule(cross('一', '幺'))
+        if PHONE_HYPHEN_MODE == 'gang':
+            phone_hyphen = cross('-', '杠')
+        else:
+            phone_hyphen = delete('-')
+        phone_space = delete(' ')
+        phone_sep = phone_hyphen | phone_space
+
+        # three or five or eleven digit phone numbers
         phone = phone_digits**3 | phone_digits**5 | phone_digits**11
+        # xxx-xxxx-xxxx or xxx xxxx xxxx (mobile phone)
+        phone |= (phone_digits**3 + phone_sep + phone_digits**4 + phone_sep +
+                  phone_digits**4)
+        # 400/800 hotline: 4001234567 or 8001234567 (10 digits)
+        phone |= (((accep('400') | accep('800')) @ phone_digits**3) +
+                  phone_digits**7)
+        # 400-xxx-xxxx or 800-xxx-xxx
+        phone |= (((accep('400') | accep('800')) @ phone_digits**3) +
+                  phone_hyphen + phone_digits**3 + phone_hyphen +
+                  phone_digits**4)
+        # landline with area code: 0xx(x)-xxxx(xxxx), e.g. 010-12345678,
+        # 0755-12345678
+        phone |= ((accep('0') @ phone_digits) + phone_digits**2 +
+                  phone_digits.ques + phone_hyphen + phone_digits**7 +
+                  phone_digits.ques)
+
+        # bank card: 16-19 continuous digits, or xxxx-xxxx-xxxx-xxx /
+        # xxxx xxxx xxxx xxx style
+        bank_card = (phone_digits**16 | phone_digits**17 | phone_digits**18 |
+                     phone_digits**19)
+        bank_card |= (phone_digits**4 + phone_sep + phone_digits**4 +
+                      phone_sep + phone_digits**4 + phone_sep +
+                      (phone_digits**4 | phone_digits**5 | phone_digits**6 |
+                       phone_digits**7))
+        phone |= bank_card
+
+        # email prefix: digits before '@' read as phone digits
+        phone |= phone_digits.plus + accep('@')
+
+        # digits following configured prefixes read as phone digits
+        for prefix in PHONE_PREFIXES:
+            phone |= accep(prefix) + delete(' ').ques + phone_digits.plus
+
+        # mixed alphanumeric codes (order IDs, etc.): digits and uppercase
+        # letters mixed together; digits are read digit-by-digit like phone
+        # numbers, uppercase letters are kept as-is.
+        alnum = phone_digits | self.UPPER
+        mixed_code = ((alnum.star + phone_digits + alnum.star + self.UPPER +
+                       alnum.star) |
+                      (alnum.star + self.UPPER + alnum.star + phone_digits +
+                       alnum.star))
+        phone |= mixed_code
+
+        # ID card: 15 or 18 continuous digits; or 17 digits + X/x
+        id_card = phone_digits**15 | phone_digits**18
+        id_card |= phone_digits**17 + (cross('X', '叉') | cross('x', '叉'))
+        # Give ID card slightly higher priority than bank card so that 18-digit
+        # numbers are treated as ID card rather than bank card.
+        phone |= add_weight(id_card, -0.1)
+
         phone |= accep("尾号") + (accep("是") | accep("为")).ques + phone_digits**4
         cardinal |= add_weight(phone, -1.0)
 
