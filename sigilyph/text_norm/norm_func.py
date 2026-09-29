@@ -5,7 +5,7 @@ Author: Yixiang Chen
 version: 
 Date: 2025-03-31 17:50:26
 LastEditors: Yixiang Chen
-LastEditTime: 2026-01-26 14:22:38
+LastEditTime: 2026-09-29 15:20:40
 '''
 
 
@@ -20,8 +20,8 @@ import os
 from importlib_resources import files
 basedir = files('sigilyph')
 
-zh_tn_model = ZhNormalizer(version_id='v4', cache_dir=os.path.join(basedir, 'text_norm', 'cache_dir'), remove_erhua=False, full_to_half=False)
-en_tn_model = EnNormalizer(version_id='v4', cache_dir=os.path.join(basedir, 'text_norm', 'cache_dir'))
+zh_tn_model = ZhNormalizer(version_id='v5', cache_dir=os.path.join(basedir, 'text_norm', 'cache_dir'), remove_erhua=False, full_to_half=False)
+en_tn_model = EnNormalizer(version_id='v5', cache_dir=os.path.join(basedir, 'text_norm', 'cache_dir'))
 
 import json
 with open(os.path.join(basedir, 'core', 'special_dict.json'), 'r', encoding="utf-8") as infi:

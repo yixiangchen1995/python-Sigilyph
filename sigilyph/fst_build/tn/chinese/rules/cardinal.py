@@ -15,7 +15,9 @@
 from tn.processor import Processor
 from tn.utils import get_abs_path
 
-from pynini import accep, cross, string_file
+import string
+
+from pynini import accep, cross, string_file, union
 from pynini.lib.pynutil import add_weight, delete, insert
 
 # 配置电话中的连字符 '-' 如何发音：
@@ -27,6 +29,27 @@ PHONE_HYPHEN_MODE = 'delete'
 PHONE_PREFIXES = [
     '工号',
     '浮光掠影',
+]
+
+# 配置邮箱地址中哪些后缀形式保持原样（不转换为大写加空格）。
+# 这里应同时包含原始后缀以及前置替换后的别名形式（如 '点com'）。
+# 其他后缀的字母会按大写加空格处理。
+EMAIL_RESERVED_SUFFIXES = [
+    '.com',
+    '点com',
+    '.cn',
+    '点cn',
+    '.net',
+    '点net',
+]
+
+# 配置邮箱 local 部分中下划线可能被前置替换成的形式。
+# 这些形式会在邮箱上下文中原样保留，不会还原为 '_'。
+EMAIL_UNDERSCORE_ALIASES = [
+    ' 下划线 ',
+    '下划线',
+    ' Underscore ',
+    'Underscore',
 ]
 
 
@@ -90,6 +113,30 @@ class Cardinal(Processor):
 
         # phone numbers: every digit is read separately, and '1' is read as '幺'
         phone_digits = digits @ self.build_rule(cross('一', '幺'))
+
+        # 邮箱规则：local 和 domain 中的英文字母转换成大写加空格，
+        # 保留后缀（EMAIL_RESERVED_SUFFIXES）保持原样，其他后缀同样转换。
+        alpha_to_upper_space = union(*[
+            cross(c, c.upper() + ' ') for c in string.ascii_letters
+        ])
+        # 下划线别名（前置替换可能把 '_' 变成其他文本，这里原样保留）
+        underscore_alias = union(*[
+            accep(alias) for alias in EMAIL_UNDERSCORE_ALIASES
+        ])
+        # local 部分允许字母、数字、下划线原始形式及其别名、-、.
+        email_local_char = (alpha_to_upper_space | phone_digits | accep('_')
+                            | underscore_alias | accep('-') | accep('.'))
+        # domain label 允许字母、数字及连字符 -
+        email_domain_char = alpha_to_upper_space | phone_digits | accep('-')
+        email_domain_label = email_domain_char.plus
+        reserved_suffix = add_weight(
+            union(*[accep(suffix) for suffix in EMAIL_RESERVED_SUFFIXES]),
+            -0.1)
+        other_suffix = accep('.') + alpha_to_upper_space.plus
+        email = (email_local_char.plus + accep('@') +
+                 (email_domain_label +
+                  (accep('.') + email_domain_label).star +
+                  (reserved_suffix | other_suffix)))
         if PHONE_HYPHEN_MODE == 'gang':
             phone_hyphen = cross('-', '杠')
         else:
@@ -125,8 +172,14 @@ class Cardinal(Processor):
                        phone_digits**7))
         phone |= bank_card
 
-        # email prefix: digits before '@' read as phone digits
-        phone |= phone_digits.plus + accep('@')
+        # email: letters to uppercase+space, reserved suffixes kept as-is
+        phone |= email
+
+        # 【】bracketed account: letters to uppercase+space, digits read as phone digits
+        bracket_content_char = alpha_to_upper_space | phone_digits
+        bracket_account = (accep('【') + bracket_content_char.plus +
+                           accep('】'))
+        phone |= bracket_account
 
         # digits following configured prefixes read as phone digits
         for prefix in PHONE_PREFIXES:
