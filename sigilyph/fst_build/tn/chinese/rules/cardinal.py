@@ -152,10 +152,11 @@ class Cardinal(Processor):
         # 400/800 hotline: 4001234567 or 8001234567 (10 digits)
         phone |= (((accep('400') | accep('800')) @ phone_digits**3) +
                   phone_digits**7)
-        # 400-xxx-xxxx or 800-xxx-xxx
-        phone |= (((accep('400') | accep('800')) @ phone_digits**3) +
-                  phone_hyphen + phone_digits**3 + phone_hyphen +
+        # xxx-xxx-xxxx or xxx xxx xxxx, hyphen or space separated
+        phone |= (phone_digits**3 + phone_sep + phone_digits**3 + phone_sep +
                   phone_digits**4)
+        # xxx-xxx or xxx xxx (short code fragments), hyphen or space separated
+        phone |= (phone_digits**3 + phone_sep + phone_digits**3)
         # landline with area code: 0xx(x)-xxxx(xxxx), e.g. 010-12345678,
         # 0755-12345678
         phone |= ((accep('0') @ phone_digits) + phone_digits**2 +
